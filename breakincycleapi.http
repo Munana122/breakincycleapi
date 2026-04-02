@@ -1,0 +1,6 @@
+@breakincycleapi_HostAddress = http://localhost:5258
+
+GET {{breakincycleapi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
