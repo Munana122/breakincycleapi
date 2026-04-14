@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using breakincycleapi.Database;
 using breakincycleapi.Database.Models;
+using breakincycleapi.DTO_s;
 using MediatR;
 
 namespace breakincycleapi.Controllers;
@@ -33,16 +34,21 @@ public class StudentsController : ControllerBase
 
         return Ok(student);
     }
-
     [HttpPost]
-    public async Task<IActionResult> CreateStudent([FromBody] Student student)
+    public async Task<IActionResult> CreateStudent([FromBody] StudentDto studentDto)
     {
-        if (student == null)
-            return BadRequest(new { message = "Invalid student data." });
+        if (studentDto == null) return BadRequest(new { message = "Invalid student data." });
 
-        student.StudentId = Guid.NewGuid();
-        student.Createdat = DateTime.UtcNow;
-        student.Lastactive = DateTime.UtcNow;
+        var student = new Student
+        {
+            StudentId = Guid.NewGuid(),
+            Name = studentDto.Name,
+            Email = studentDto.Email,
+            Phonenumbar = studentDto.PhoneNumber, // Maps DTO to DB typo
+            Location = studentDto.Location,
+            Createdat = DateTime.UtcNow,
+            Lastactive = DateTime.UtcNow
+        };
 
         _context.Students.Add(student);
         await _context.SaveChangesAsync();

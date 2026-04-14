@@ -1,6 +1,6 @@
 using breakincycleapi.Database;
 using breakincycleapi.Database.Models;
-using breakincycleapi.DTOs;
+using breakincycleapi.DTO_s;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -42,7 +42,7 @@ public class CoursesController : ControllerBase
         {
             CourseId = Guid.NewGuid(), // Manually set if your DB doesn't
             Name = courseDto.Name,
-            Description = courseDto.Description,
+            Description = courseDto.Description ?? string.Empty,
             Createdat = DateTime.UtcNow,
             Lastactive = DateTime.UtcNow
         };

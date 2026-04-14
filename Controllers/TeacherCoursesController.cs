@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using breakincycleapi.Database;
 using breakincycleapi.Database.Models;
+using breakincycleapi.DTO_s;
 
 namespace breakincycleapi.Controllers;
 
@@ -33,12 +34,17 @@ public class TeacherCoursesController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateTeacherCourse([FromBody] TeacherCourse teacherCourse)
+    public async Task<IActionResult> CreateTeacherCourse([FromBody] TeacherCourseCreateDto dto)
     {
-        if (teacherCourse == null) return BadRequest(new { message = "Invalid data." });
-        
-        // Let the DB handle mapping identity if it's set to auto increment, or manual if needed
-        teacherCourse.AssignedAt = DateTime.UtcNow;
+        if (dto == null) return BadRequest(new { message = "Invalid data." });
+
+        var teacherCourse = new TeacherCourse
+        {
+            // TeacherCourseId (long) is usually auto-incremented by SQL Server
+            TeacherId = dto.TeacherId,
+            CourseId = dto.CourseId,
+            AssignedAt = DateTime.UtcNow
+        };
 
         _context.TeacherCourses.Add(teacherCourse);
         await _context.SaveChangesAsync();

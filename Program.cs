@@ -7,10 +7,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
-builder.Services.AddEndpointsApiExplorer(); // Enables Swagger API exploration
-builder.Services.AddSwaggerGen(); // Adds the Swagger generator
-
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+                    
 // Register the Database Context
 builder.Services.AddDbContext<AppDbContext>(options => 
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -33,7 +32,6 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-    app.MapOpenApi();
 }
 
 app.UseHttpsRedirection();

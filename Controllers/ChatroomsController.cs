@@ -33,17 +33,22 @@ public class ChatroomsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateChatroom([FromBody] Chatroom chatroom)
+    public async Task<IActionResult> CreateChatroom([FromBody] DTO_s.ChatroomCreateDto chatroom)
     {
         if (chatroom == null) return BadRequest(new { message = "Invalid data." });
         
-        chatroom.Roomid = Guid.NewGuid();
-        chatroom.JoinedAt = DateTime.UtcNow;
+        var newChatroom = new Chatroom
+        {
+            Roomid = Guid.NewGuid(),
+            JoinedAt = DateTime.UtcNow,
+            Name = chatroom.Name,
+            Description = chatroom.Description
+        };
 
-        _context.Chatrooms.Add(chatroom);
+        _context.Chatrooms.Add(newChatroom);
         await _context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetChatroomById), new { id = chatroom.Roomid }, chatroom);
+        return CreatedAtAction(nameof(GetChatroomById), new { id = newChatroom.Roomid }, newChatroom);
     }
 
     [HttpDelete("{id}")]

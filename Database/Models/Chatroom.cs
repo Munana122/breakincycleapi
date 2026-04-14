@@ -14,4 +14,5 @@ public partial class Chatroom
     public DateTime JoinedAt { get; set; }
 
     public virtual ICollection<Message> Messages { get; set; } = new List<Message>();
+    public string? Description { get; internal set; }
 }
