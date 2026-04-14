@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using breakincycleapi.Database;
 using breakincycleapi.Database.Models;
+using breakincycleapi.DTO_s;
 
 namespace breakincycleapi.Controllers;
 
@@ -33,11 +34,18 @@ public class MessagesController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateMessage([FromBody] Message message)
+    public async Task<IActionResult> CreateMessage([FromBody] MessageCreateDto dto)
     {
-        if (message == null) return BadRequest(new { message = "Invalid data." });
-        
-        message.Createdat = DateTime.UtcNow;
+        if (dto == null) return BadRequest(new { message = "Invalid data." });
+
+        var message = new Message
+        {
+            Roomid = dto.RoomId,
+            UserId = dto.UserId,
+            Name = dto.Name,
+            Message1 = dto.Message,
+            Createdat = DateTime.UtcNow
+        };
 
         _context.Messages.Add(message);
         await _context.SaveChangesAsync();

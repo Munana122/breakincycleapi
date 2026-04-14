@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using breakincycleapi.Database;
 using breakincycleapi.Database.Models;
+using breakincycleapi.DTO_s;
 
 namespace breakincycleapi.Controllers
 {
@@ -33,15 +34,22 @@ namespace breakincycleapi.Controllers
         // POST: api/Users
         // -------------------------------------------------------------
         [HttpPost]
-        public async Task<IActionResult> CreateUser([FromBody] User user)
+        public async Task<IActionResult> CreateUser([FromBody] UserCreateDto dto)
         {
-            if (user == null)
+            if (dto == null)
                 return BadRequest(new { message = "Invalid user data." });
 
-            // Ensure newly created entities get fresh IDs and timestamps 
-            user.Id = Guid.NewGuid();
-            user.Createdat = DateTime.UtcNow;
-            user.Lastactive = DateTime.UtcNow;
+            var user = new User
+            {
+                Id = Guid.NewGuid(),
+                Name = dto.Name,
+                Email = dto.Email,
+                PasswordHash = dto.Password, // hash before storing in production
+                Phonenumbar = dto.PhoneNumber,
+                Location = dto.Location,
+                Createdat = DateTime.UtcNow,
+                Lastactive = DateTime.UtcNow
+            };
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
