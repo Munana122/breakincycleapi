@@ -1,4 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using breakincycleapi.Database;
 using MediatR;
 using breakincycleapi;
@@ -13,6 +16,25 @@ builder.Services.AddSwaggerGen();
 // Register the Database Context
 builder.Services.AddDbContext<AppDbContext>(options => 
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Register JWT Authentication
+// This tells the app: "when someone sends a token, validate it using our secret key"
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,         // reject expired tokens
+            ValidateIssuerSigningKey = true,  // verify the secret key
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+        };
+    });
+builder.Services.AddAuthorization();
 
 // Register MediatR for Vertical Slice Architecture
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly))
@@ -35,6 +57,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseAuthentication(); // reads the token from the request
+app.UseAuthorization();  // checks if the token allows access
 
 // Turn on Controllers so they listen to web traffic
 app.MapControllers();

@@ -44,7 +44,7 @@ namespace breakincycleapi.Controllers
                 Id = Guid.NewGuid(),
                 Name = dto.Name,
                 Email = dto.Email,
-                PasswordHash = dto.Password, // hash before storing in production
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password), // hashed with BCrypt
                 Phonenumbar = dto.PhoneNumber,
                 Location = dto.Location,
                 Createdat = DateTime.UtcNow,
