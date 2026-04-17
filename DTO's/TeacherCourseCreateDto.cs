@@ -4,5 +4,6 @@ namespace breakincycleapi.DTO_s
     {
         public Guid TeacherId { get; set; }
         public Guid CourseId { get; set; }
+       
     }
 }

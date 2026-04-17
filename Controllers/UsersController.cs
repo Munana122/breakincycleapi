@@ -18,6 +18,16 @@ namespace breakincycleapi.Controllers
         }
 
         // -------------------------------------------------------------
+        // GET: api/Users
+        // -------------------------------------------------------------
+        [HttpGet]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            var users = await _context.Users.ToListAsync();
+            return Ok(users);
+        }
+
+        // -------------------------------------------------------------
         // GET: api/Users/{id}
         // -------------------------------------------------------------
         [HttpGet("{id}")]
@@ -61,22 +71,16 @@ namespace breakincycleapi.Controllers
         // PUT: api/Users/{id}
         // -------------------------------------------------------------
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(Guid id, [FromBody] User updatedUser)
+        public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UserUpdateDto dto)
         {
-            // Safety check to prevent mistakenly editing the wrong user
-            if (id != updatedUser.Id)
-                return BadRequest(new { message = "ID mismatch." });
-
             var existingUser = await _context.Users.FindAsync(id);
             if (existingUser == null)
                 return NotFound(new { message = "User not found." });
 
-            // Safely update specific properties to avoid accidentally overwriting IDs or creation dates
-            existingUser.Name = updatedUser.Name;
-            existingUser.Email = updatedUser.Email;
-            existingUser.PasswordHash = updatedUser.PasswordHash;
-            existingUser.Phonenumbar = updatedUser.Phonenumbar;
-            existingUser.Location = updatedUser.Location;
+            existingUser.Name = dto.Name;
+            existingUser.Email = dto.Email;
+            existingUser.Phonenumbar = dto.PhoneNumber;
+            existingUser.Location = dto.Location;
             existingUser.Lastactive = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();

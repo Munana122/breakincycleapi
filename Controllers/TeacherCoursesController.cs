@@ -20,14 +20,39 @@ public class TeacherCoursesController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAllTeacherCourses()
     {
-        var teacherCourses = await _context.TeacherCourses.ToListAsync();
+        var teacherCourses = await _context.TeacherCourses
+            .Include(tc => tc.Teacher)
+            .Include(tc => tc.Course)
+            .Select(tc => new
+            {
+                tc.TeacherCourseId,
+                tc.TeacherId,
+                TeacherName = tc.Teacher.Name,
+                tc.CourseId,
+                CourseName = tc.Course.Name,
+                tc.AssignedAt
+            })
+            .ToListAsync();
         return Ok(teacherCourses);
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetTeacherCourseById(long id) // TeacherCourseId is 'long'
+    public async Task<IActionResult> GetTeacherCourseById(long id)
     {
-        var teacherCourse = await _context.TeacherCourses.FindAsync(id);
+        var teacherCourse = await _context.TeacherCourses
+            .Include(tc => tc.Teacher)
+            .Include(tc => tc.Course)
+            .Where(tc => tc.TeacherCourseId == id)
+            .Select(tc => new
+            {
+                tc.TeacherCourseId,
+                tc.TeacherId,
+                TeacherName = tc.Teacher.Name,
+                tc.CourseId,
+                CourseName = tc.Course.Name,
+                tc.AssignedAt
+            })
+            .FirstOrDefaultAsync();
         if (teacherCourse == null) return NotFound(new { message = "TeacherCourse mapping not found." });
 
         return Ok(teacherCourse);

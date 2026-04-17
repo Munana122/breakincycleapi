@@ -20,16 +20,18 @@ public class ChatroomsController : ControllerBase
     public async Task<IActionResult> GetAllChatrooms()
     {
         var chatrooms = await _context.Chatrooms.ToListAsync();
+        if(chatrooms == null) return NotFound(new { message = "No chatrooms found." });
         return Ok(chatrooms);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetChatroomById(Guid id) // Roomid is Guid
     {
-        var chatroom = await _context.Chatrooms.FindAsync(id);
-        if (chatroom == null) return NotFound(new { message = "Chatroom not found." });
-
-        return Ok(chatroom);
+        var chatrooms = await _context.Chatrooms
+           .Include(c => c.Messages)
+           .FirstOrDefaultAsync(c => c.Roomid == id);
+        if (chatrooms == null) return NotFound(new { message = "No chatrooms found." });
+        return Ok(chatrooms);
     }
 
     [HttpPost]
