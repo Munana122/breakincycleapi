@@ -11,7 +11,7 @@ public partial class Progress
 
     public Guid CourseId { get; set; }
 
-    public int ProgressPercentage { get; set; }
+    public string ProgressStatus { get; set; }
 
     public DateTime LastUpdated { get; set; }
 

@@ -19,18 +19,57 @@ public class ChatroomsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAllChatrooms()
     {
-        var chatrooms = await _context.Chatrooms.ToListAsync();
-        if(chatrooms == null) return NotFound(new { message = "No chatrooms found." });
-        return Ok(chatrooms);
+        var chatrooms = await _context.Chatrooms
+            .Select(c => new
+            {
+                c.Roomid,
+                name = c.Name,
+                c.Userid,
+                c.JoinedAt,
+                description = c.Description,
+                messages = c.Messages.Select(m => new
+                {
+                    m.MessageId,
+                    m.Roomid,
+                    m.UserId,
+                    m.Name,
+                    m.Message1,
+                    m.Createdat,
+                    Room = c.Name,
+                    user = m.User.Name
+                }).ToList()
+            })
+            .FirstOrDefaultAsync();
+        if (chatrooms == null) return NotFound(new { message = "No chatroom found" });
+        return Ok(chatrooms);           
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetChatroomById(Guid id) // Roomid is Guid
     {
         var chatrooms = await _context.Chatrooms
-           .Include(c => c.Messages)
-           .FirstOrDefaultAsync(c => c.Roomid == id);
-        if (chatrooms == null) return NotFound(new { message = "No chatrooms found." });
+              .Where(c => c.Roomid == id)
+              .Select(c => new
+              {
+                  c.Roomid,
+                  name = c.Name,
+                  c.Userid,
+                  c.JoinedAt,
+                  description = c.Description,
+                  messages = c.Messages.Select(m => new
+                  {
+                      m.MessageId,
+                      m.Roomid,
+                      m.UserId,
+                      m.Name,
+                      m.Message1,
+                      m.Createdat,
+                      Room = c.Name,
+                      user = m.User.Name
+                  }).ToList()
+              })
+              .FirstOrDefaultAsync();
+        if (chatrooms == null) return NotFound(new { message = "No chatroom found" });
         return Ok(chatrooms);
     }
 

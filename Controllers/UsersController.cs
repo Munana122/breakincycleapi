@@ -17,9 +17,6 @@ namespace breakincycleapi.Controllers
             _context = context;
         }
 
-        // -------------------------------------------------------------
-        // GET: api/Users
-        // -------------------------------------------------------------
         [HttpGet]
         public async Task<IActionResult> GetAllUsers()
         {
@@ -27,9 +24,6 @@ namespace breakincycleapi.Controllers
             return Ok(users);
         }
 
-        // -------------------------------------------------------------
-        // GET: api/Users/{id}
-        // -------------------------------------------------------------
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserById(Guid id)
         {
@@ -40,9 +34,6 @@ namespace breakincycleapi.Controllers
             return Ok(user);
         }
 
-        // -------------------------------------------------------------
-        // POST: api/Users
-        // -------------------------------------------------------------
         [HttpPost]
         public async Task<IActionResult> CreateUser([FromBody] UserCreateDto dto)
         {
@@ -67,9 +58,6 @@ namespace breakincycleapi.Controllers
             return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, user);
         }
 
-        // -------------------------------------------------------------
-        // PUT: api/Users/{id}
-        // -------------------------------------------------------------
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UserUpdateDto dto)
         {
@@ -88,9 +76,7 @@ namespace breakincycleapi.Controllers
             return Ok(existingUser);
         }
 
-        // -------------------------------------------------------------
-        // DELETE: api/Users/{id}
-        // -------------------------------------------------------------
+       
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(Guid id)
         {

@@ -74,4 +74,4 @@ public class ProgressesController : ControllerBase
 
         return Ok(new { message = "Progress mapped deleted successfully." });
     }
-}
+}s

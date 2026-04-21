@@ -20,14 +20,38 @@ public class MessagesController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAllMessages()
     {
-        var messages = await _context.Messages.ToListAsync();
+        var messages = await _context.Messages
+            .Select(a => new
+            {
+                a.MessageId,
+                roomid = a.Roomid,
+                a.UserId,
+                a.Name,
+                a.Message1,
+                a.Createdat,
+                room = a.Room.Name,
+                User = a.User.Name
+            }).ToListAsync();
         return Ok(messages);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetMessageById(long id) // MessageId is 'long'
     {
-        var message = await _context.Messages.FindAsync(id);
+        var message = await _context.Messages
+            .Where(a => a.MessageId == id)
+             .Select(a => new
+             {
+                 a.MessageId,
+                 roomid = a.Roomid,
+                 a.UserId,
+                 a.Name,
+                 a.Message1,
+                 a.Createdat,
+                 room = a.Room.Name,
+                 User = a.User.Name
+             }).ToListAsync();
+
         if (message == null) return NotFound(new { message = "Message not found." });
 
         return Ok(message);
