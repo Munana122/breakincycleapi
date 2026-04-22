@@ -11,7 +11,7 @@ public partial class Student
 
     public string Email { get; set; } = null!;
 
-    public string Phonenumbar { get; set; } = null!;
+    public string Phonenumber { get; set; } = null!;
 
     public string Location { get; set; } = null!;
 

@@ -54,17 +54,16 @@ public class CoursesController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateCourse(Guid id, [FromBody] Course updatedCourse)
-    {
-        if (id != updatedCourse.CourseId)
+    public async Task<IActionResult> UpdateCourse(Guid id, [FromBody] CourseUpdateDTO dto)
+    { 
             return BadRequest(new { message = "ID mismatch." });
 
         var existingCourse = await _context.Courses.FindAsync(id);
         if (existingCourse == null)
             return NotFound(new { message = "Course not found." });
 
-        existingCourse.Name = updatedCourse.Name;
-        existingCourse.Description = updatedCourse.Description;
+        existingCourse.Name = dto.Name;
+        existingCourse.Description = dto.Description;
         existingCourse.Lastactive = DateTime.UtcNow;
 
         _context.Courses.Update(existingCourse);

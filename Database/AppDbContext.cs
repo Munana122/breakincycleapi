@@ -93,6 +93,7 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.ProgressId).HasColumnName("ProgressID");
             entity.Property(e => e.CourseId).HasColumnName("CourseID");
             entity.Property(e => e.LastUpdated).HasPrecision(0);
+            entity.Property(e => e.ProgressStatus).HasMaxLength(100);
             entity.Property(e => e.StudentId).HasColumnName("StudentID");
 
             entity.HasOne(d => d.Course).WithMany(p => p.Progresses)
@@ -122,7 +123,7 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Lastactive).HasPrecision(0);
             entity.Property(e => e.Location).HasMaxLength(250);
             entity.Property(e => e.Name).HasMaxLength(250);
-            entity.Property(e => e.Phonenumbar).HasMaxLength(250);
+            entity.Property(e => e.Phonenumber).HasMaxLength(250);
         });
 
         modelBuilder.Entity<Teacher>(entity =>

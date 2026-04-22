@@ -11,8 +11,7 @@ public partial class Progress
 
     public Guid CourseId { get; set; }
 
-    public string ProgressStatus { get; set; }
-
+    public string ProgressStatus { get; set; } = string.Empty;
     public DateTime LastUpdated { get; set; }
 
     public virtual Course Course { get; set; } = null!;

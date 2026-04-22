@@ -70,7 +70,7 @@ public class AuthController : ControllerBase
                 StudentId = user.Id,
                 Name = dto.Name,
                 Email = dto.Email,
-                Phonenumbar = dto.PhoneNumber,
+                Phonenumber = dto.PhoneNumber,
                 Location = dto.Location,
                 Createdat = DateTime.UtcNow,
                 Lastactive = DateTime.UtcNow

@@ -15,6 +15,8 @@ public partial class Teacher
 
     public string Location { get; set; } = null!;
 
+    public string Coursename { get; set; } = null!;
+
     public DateTime Createdat { get; set; }
 
     public DateTime Lastactive { get; set; }

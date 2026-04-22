@@ -44,7 +44,7 @@ public class StudentsController : ControllerBase
             StudentId = Guid.NewGuid(),
             Name = studentDto.Name,
             Email = studentDto.Email,
-            Phonenumbar = studentDto.PhoneNumber, // Maps DTO to DB typo
+            Phonenumber = studentDto.PhoneNumber, // Maps DTO to DB typo
             Location = studentDto.Location,
             Createdat = DateTime.UtcNow,
             Lastactive = DateTime.UtcNow
@@ -57,21 +57,19 @@ public class StudentsController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateStudent(Guid id, [FromBody] Student updatedStudent)
+    public async Task<IActionResult> UpdateStudent(Guid id, [FromBody] StudentUpdateDto dto)
     {
-        if (id != updatedStudent.StudentId)
             return BadRequest(new { message = "ID mismatch." });
 
         var existingStudent = await _context.Students.FindAsync(id);
         if (existingStudent == null)
             return NotFound(new { message = "Student not found." });
 
-        existingStudent.Name = updatedStudent.Name;
-        existingStudent.Email = updatedStudent.Email;
-        existingStudent.Phonenumbar = updatedStudent.Phonenumbar;
-        existingStudent.Location = updatedStudent.Location;
+        existingStudent.Name = dto.Name;
+        existingStudent.Email = dto.Email;
+        existingStudent.Phonenumber = dto.Phonenumber;
+        existingStudent.Location = dto.Location;
         existingStudent.Lastactive = DateTime.UtcNow;
-
         _context.Students.Update(existingStudent);
         await _context.SaveChangesAsync();
 

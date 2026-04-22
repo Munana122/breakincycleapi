@@ -43,6 +43,7 @@ public class TeachersController : ControllerBase
             TeacherId = Guid.NewGuid(),
             Name = dto.Name,
             Email = dto.Email,
+            Coursename = dto.Coursename,
             Phonenumber = dto.PhoneNumber,
             Location = dto.Location,
             Createdat = DateTime.UtcNow,
@@ -56,17 +57,16 @@ public class TeachersController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateTeacher(Guid id, [FromBody] Teacher updatedTeacher)
+    public async Task<IActionResult> UpdateTeacher(Guid id, [FromBody] TeacherUpdateDTO dto)
     {
-        if (id != updatedTeacher.TeacherId) return BadRequest(new { message = "ID mismatch." });
 
         var existingTeacher = await _context.Teachers.FindAsync(id);
         if (existingTeacher == null) return NotFound(new { message = "Teacher not found." });
 
-        existingTeacher.Name = updatedTeacher.Name;
-        existingTeacher.Email = updatedTeacher.Email;
-        existingTeacher.Phonenumber = updatedTeacher.Phonenumber; // Fixed typo "Phonenumbar" from previous models based on new class properties
-        existingTeacher.Location = updatedTeacher.Location;
+        existingTeacher.Name = dto.Name;
+        existingTeacher.Email = dto.Email;
+        existingTeacher.Phonenumber = dto.Phonenumber; // Fixed typo "Phonenumbar" from previous models based on new class properties
+        existingTeacher.Coursename = dto.Coursename;
         existingTeacher.Lastactive = DateTime.UtcNow;
 
         _context.Teachers.Update(existingTeacher);
