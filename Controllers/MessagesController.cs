@@ -72,26 +72,16 @@ public class MessagesController : ControllerBase
         };
 
         _context.Messages.Add(message);
+        var room = await _context.Chatrooms.FindAsync(dto.RoomId);
+        if (room != null)
+        {
+            room.MessageSenderName = dto.Name;
+            room.MessageContent = dto.Message;
+            // You might also want to update the MessageId in the room table
+        }
         await _context.SaveChangesAsync();
 
         return CreatedAtAction(nameof(GetMessageById), new { id = message.MessageId }, message);
-    }
-
-    [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateMessage(long id, [FromBody] Message updatedMessage)
-    {
-        if (id != updatedMessage.MessageId) return BadRequest(new { message = "ID mismatch." });
-
-        var existingMessage = await _context.Messages.FindAsync(id);
-        if (existingMessage == null) return NotFound(new { message = "Message not found." });
-
-        // According to model, Message text is in Message1 property
-        existingMessage.Message1 = updatedMessage.Message1;
-
-        _context.Messages.Update(existingMessage);
-        await _context.SaveChangesAsync();
-
-        return Ok(existingMessage);
     }
 
     [HttpDelete("{id}")]

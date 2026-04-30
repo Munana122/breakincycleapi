@@ -37,6 +37,8 @@ public partial class AppDbContext : DbContext
         modelBuilder.Entity<Chatroom>(entity =>
         {
             entity.HasKey(e => e.Roomid).HasName("PK_ChatRooms");
+            entity.Property(e => e.MessageId)
+                .HasColumnName("MessageID");
 
             entity.Property(e => e.Roomid)
                 .HasDefaultValueSql("(newid())", "DF_Chatrooms")
@@ -46,6 +48,14 @@ public partial class AppDbContext : DbContext
                 .HasMaxLength(150)
                 .HasColumnName("NAME");
             entity.Property(e => e.Userid).HasColumnName("USERID");
+
+            // Map the manually added columns
+            entity.Property(e => e.MessageSenderName)
+                .HasColumnName("MessageSenderName");
+            entity.Property(e => e.MessageContent)
+                .HasColumnName("MessageContent");
+            entity.Property(e => e.Description)
+                .HasColumnName("Description");
         });
 
         modelBuilder.Entity<Course>(entity =>
@@ -95,11 +105,6 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.LastUpdated).HasPrecision(0);
             entity.Property(e => e.ProgressStatus).HasMaxLength(100);
             entity.Property(e => e.StudentId).HasColumnName("StudentID");
-
-            entity.HasOne(d => d.Course).WithMany(p => p.Progresses)
-                .HasForeignKey(d => d.CourseId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_progress_course");
 
             entity.HasOne(d => d.Student).WithMany(p => p.Progresses)
                 .HasForeignKey(d => d.StudentId)
@@ -155,11 +160,6 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.AssignedAt).HasPrecision(0);
             entity.Property(e => e.CourseId).HasColumnName("CourseID");
             entity.Property(e => e.TeacherId).HasColumnName("TeacherID");
-
-            entity.HasOne(d => d.Course).WithMany(p => p.TeacherCourses)
-                .HasForeignKey(d => d.CourseId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_teacher_course_course");
 
             entity.HasOne(d => d.Teacher).WithMany(p => p.TeacherCourses)
                 .HasForeignKey(d => d.TeacherId)

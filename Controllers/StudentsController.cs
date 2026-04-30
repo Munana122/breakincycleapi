@@ -59,6 +59,7 @@ public class StudentsController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateStudent(Guid id, [FromBody] StudentUpdateDto dto)
     {
+        if (id != dto.Id)
             return BadRequest(new { message = "ID mismatch." });
 
         var existingStudent = await _context.Students.FindAsync(id);

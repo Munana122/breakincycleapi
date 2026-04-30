@@ -1,24 +1,21 @@
-using Microsoft.EntityFrameworkCore;
+using breakincycleapi;
+using breakincycleapi.Database;
+using breakincycleapi.Services;
+using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using breakincycleapi.Database;
-using MediatR;
-using breakincycleapi;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-                    
-// Register the Database Context
+builder.Services.AddScoped<IChatroomService, ChatroomService>();
+
 builder.Services.AddDbContext<AppDbContext>(options => 
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Register JWT Authentication
-// This tells the app: "when someone sends a token, validate it using our secret key"
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {

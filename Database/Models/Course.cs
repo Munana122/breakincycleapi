@@ -15,7 +15,4 @@ public partial class Course
 
     public DateTime Lastactive { get; set; }
 
-    public virtual ICollection<Progress> Progresses { get; set; } = new List<Progress>();
-
-    public virtual ICollection<TeacherCourse> TeacherCourses { get; set; } = new List<TeacherCourse>();
 }

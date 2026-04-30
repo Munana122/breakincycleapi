@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace breakincycleapi.Database.Models;
 
@@ -13,6 +14,12 @@ public partial class Chatroom
 
     public DateTime JoinedAt { get; set; }
 
-    public virtual ICollection<Message> Messages { get; set; } = new List<Message>();
+    public string? MessageSenderName { get; set; } 
+    public string? MessageContent { get; set; }
     public string? Description { get; internal set; }
+    public long? MessageId { get; set; }
+
+    [ForeignKey("MessageId")]
+    public virtual Message? LastMessage { get; set; } // The link to the Message object
+    public virtual ICollection<Message> Messages { get; set; } = new List<Message>();
 }
