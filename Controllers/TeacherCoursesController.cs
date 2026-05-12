@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using breakincycleapi.Database;
 using breakincycleapi.Database.Models;
 using breakincycleapi.DTO_s;
+using breakincycleapi.services;
+using breakincycleapi.Services;
 
 namespace breakincycleapi.Controllers;
 
@@ -10,17 +12,17 @@ namespace breakincycleapi.Controllers;
 [Route("api/[controller]")]
 public class TeacherCoursesController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly ITeacherCourse _teacherService;
 
-    public TeacherCoursesController(AppDbContext context)
+    public TeacherCoursesController(ITeacherCourse _teacherService)
     {
-        _context = context;
+        _teacherService = teacherService;
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAllTeacherCourses()
+    public async Task<IEnumerable<object>> GetAllTeacherCourses()
     {
-        var teacherCourses = await _context.TeacherCourses
+        var teacherCourses = await _teacherService.TeacherCourses
             .Include(tc => tc.Teacher)
             .Include(tc => tc.Course)
             .Select(tc => new

@@ -1,8 +1,6 @@
-using breakincycleapi.Database;
-using breakincycleapi.Database.Models;
 using breakincycleapi.DTO_s;
+using breakincycleapi.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace breakincycleapi.Controllers;
 
@@ -10,78 +8,53 @@ namespace breakincycleapi.Controllers;
 [Route("api/[controller]")]
 public class CoursesController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly ICourceService _courseService;
 
-    public CoursesController(AppDbContext context)
+    public CoursesController(ICourceService courseService)
     {
-        _context = context;
+        _courseService = courseService;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAllCourses()
     {
-        var courses = await _context.Courses.ToListAsync();
+        var courses = await _courseService.GetAllCoursesAsync();
         return Ok(courses);
     }
 
-    [HttpGet("controller/{id}", Name = "GetCourseByIdController")]
+    [HttpGet("{id}", Name = "GetCourseByIdController")]
     public async Task<IActionResult> GetCourseById(Guid id)
     {
-        var course = await _context.Courses.FindAsync(id);
+        var course = await _courseService.GetCourseByIdAsync(id);
         if (course == null)
             return NotFound(new { message = "Course not found." });
-
         return Ok(course);
     }
 
     [HttpPost]
-    public async Task<ActionResult<Course>> PostCourse(CourseCreateDto courseDto)
+    public async Task<IActionResult> CreateCourse(CourseCreateDto courseDto)
     {
-        // Map the DTO to the real Database Model
-        var course = new Course
-        {
-            CourseId = Guid.NewGuid(), // Manually set if your DB doesn't
-            Name = courseDto.Name,
-            Description = courseDto.Description ?? string.Empty,
-            Createdat = DateTime.UtcNow,
-            Lastactive = DateTime.UtcNow
-        };
-
-        _context.Courses.Add(course);
-        await _context.SaveChangesAsync();
-
-        return CreatedAtRoute("GetCourseByIdController", new { id = course.CourseId }, course);
+        var courseId = await _courseService.CreateCourseAsync(courseDto);
+        return CreatedAtRoute("GetCourseByIdController", new { id = courseId }, new { id = courseId });
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateCourse(Guid id, [FromBody] CourseUpdateDTO dto)
-    { 
+    {
+        if (id != dto.CourseId)
             return BadRequest(new { message = "ID mismatch." });
-
-        var existingCourse = await _context.Courses.FindAsync(id);
-        if (existingCourse == null)
+        var updatedId = await _courseService.UpdateCourseAsync(dto);
+        if (updatedId == Guid.Empty)
             return NotFound(new { message = "Course not found." });
-
-        existingCourse.Name = dto.Name;
-        existingCourse.Description = dto.Description;
-        existingCourse.Lastactive = DateTime.UtcNow;
-
-        _context.Courses.Update(existingCourse);
-        await _context.SaveChangesAsync();
-
-        return Ok(existingCourse);
+        return Ok(new { id = updatedId });
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteCourse(Guid id)
     {
-        var course = await _context.Courses.FindAsync(id);
-        if (course == null)
+        var deleted = await _courseService.DeleteCourseAsync(id);
+        if (!deleted)
             return NotFound(new { message = "Course not found." });
-
-        _context.Courses.Remove(course);
-        await _context.SaveChangesAsync();
-
         return Ok(new { message = "Course deleted successfully." });
     }
 }

@@ -1,0 +1,81 @@
+﻿using breakincycleapi.Database;
+using breakincycleapi.Database.Models;
+using breakincycleapi.Services;
+
+namespace breakincycleapi.Services
+{
+    public class TeacherCourseService : ITeacherCourse
+    {
+        private readonly AppDbContext _context;
+        public TeacherCourseService(AppDbContext context)
+        {
+            _context = context;
+        }
+        public async Task<IEnumerable<object>> GetAllTeacherCourseAsync()
+        {
+            var teacherCourses = await _context.TeacherCourses
+            .Include(tc => tc.Teacher)
+            .Include(tc => tc.Course)
+            .Select(tc => new
+            {
+                tc.TeacherCourseId,
+                tc.TeacherId,
+                TeacherName = tc.Teacher.Name,
+                tc.CourseId,
+                CourseName = tc.Course.Name,
+                tc.AssignedAt
+            })
+            .ToListAsync();
+            return Ok(teacherCourses);
+
+        }
+        public async Task<object> GetTeacherCourseByIdAsync(id)
+        {
+            var teacherCourse = await _context.TeacherCourses
+           .Include(tc => tc.Teacher)
+           .Include(tc => tc.Course)
+           .Where(tc => tc.TeacherCourseId == id)
+           .Select(tc => new
+           {
+               tc.TeacherCourseId,
+               tc.TeacherId,
+               TeacherName = tc.Teacher.Name,
+               tc.CourseId,
+               CourseName = tc.Course.Name,
+               tc.AssignedAt
+           })
+           .FirstOrDefaultAsync();
+            if (teacherCourse == null) return NotFound(new { message = "TeacherCourse mapping not found." });
+
+            return Ok(teacherCourse);
+
+        }
+        public async Task<Guid> CreateTeacherCourseAsync(cre)
+        {
+            if (dto == null) return BadRequest(new { message = "Invalid data." });
+
+            var teacherCourse = new TeacherCourse
+            {
+                // TeacherCourseId (long) is usually auto-incremented by SQL Server
+                TeacherId = dto.TeacherId,
+                CourseId = dto.CourseId,
+                AssignedAt = DateTime.UtcNow
+            };
+
+            _context.TeacherCourses.Add(teacherCourse);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetTeacherCourseById), new { id = teacherCourse.TeacherCourseId }, teacherCourse);
+        }
+        public async Task<Guid> DeleteTeacherCourseById()
+        {
+            var teacherCourse = await _context.TeacherCourses.FindAsync(id);
+            if (teacherCourse == null) return NotFound(new { message = "TeacherCourse mapping not found." });
+
+            _context.TeacherCourses.Remove(teacherCourse);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Mapping deleted successfully." });
+        }
+    }
+}

@@ -3,31 +3,33 @@ using Microsoft.EntityFrameworkCore;
 using breakincycleapi.Database;
 using breakincycleapi.Database.Models;
 using breakincycleapi.DTO_s;
-
+using breakincycleapi.Services;
+using MediatR;  
 namespace breakincycleapi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
     public class UsersController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IUserService _userService;
 
-        public UsersController(AppDbContext context)
+        public UsersController(IUserService userService)
         {
-            _context = context;
+            _userService = userService;
+
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAllUsers()
         {
-            var users = await _context.Users.ToListAsync();
+            var users = await _userService.GetAllUsersAsync();
             return Ok(users);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserById(Guid id)
         {
-            var user = await _context.Users.FindAsync(id);
+            var user = await _userService.GetUsersByIdAsync(id);
             if (user == null)
                 return NotFound(new { message = "User not found." });
 
@@ -37,58 +39,32 @@ namespace breakincycleapi.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateUser([FromBody] UserCreateDto dto)
         {
-            if (dto == null)
-                return BadRequest(new { message = "Invalid user data." });
-
-            var user = new User
-            {
-                Id = Guid.NewGuid(),
-                Name = dto.Name,
-                Email = dto.Email,
-                Role =dto.Role,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password), // hashed with BCrypt
-                Phonenumbar = dto.PhoneNumber,
-                Location = dto.Location,
-                Createdat = DateTime.UtcNow,
-                Lastactive = DateTime.UtcNow
-            };
-
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, user);
+            var newId = await _userService.CreateUserAsync(dto);
+            return CreatedAtAction(nameof(GetUserById), new { id = newId }, new { id = newId });
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UserUpdateDto dto)
+        public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UserUpdateDto user)
         {
-            var existingUser = await _context.Users.FindAsync(id);
-            if (existingUser == null)
-                return NotFound(new { message = "User not found." });
 
-            existingUser.Name = dto.Name;
-            existingUser.Email = dto.Email;
-            existingUser.Phonenumbar = dto.PhoneNumber;
-            existingUser.Location = dto.Location;
-            existingUser.Lastactive = DateTime.UtcNow;
-
-            await _context.SaveChangesAsync();
-
-            return Ok(existingUser);
+            if (user == null)
+                return BadRequest(new { message = "Data is required" });
+            var success = await _userService.UpdateUserAsync(id, user);
+            if (!success)
+                return NotFound(new { message = $"User with ID {id} not found." });
+            return NoContent();
         }
 
        
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(Guid id)
         {
-            var user = await _context.Users.FindAsync(id);
-            if (user == null)
-                return NotFound(new { message = "User not found." });
+            var deleted = await _userService.DeleteUserAsync(id);
 
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
 
-            return Ok(new { message = "User deleted successfully." });
+            if (!deleted) return NotFound(new { message = "Chatroom not found." });
+
+            return Ok(new { message = "Chatroom deleted successfully." });
         }
     }
 }

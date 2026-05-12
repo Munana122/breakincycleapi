@@ -1,8 +1,9 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using breakincycleapi.Database;
 using breakincycleapi.Database.Models;
 using breakincycleapi.DTO_s;
+using breakincycleapi.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace breakincycleapi.Controllers;
 
@@ -10,89 +11,41 @@ namespace breakincycleapi.Controllers;
 [Route("api/[controller]")]
 public class MessagesController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly IMessageService _messageService;
 
-    public MessagesController(AppDbContext context)
+    public MessagesController(IMessageService messageService)
     {
-        _context = context;
+        _messageService = messageService;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAllMessages()
     {
-        var messages = await _context.Messages
-            .Select(a => new
-            {
-                a.MessageId,
-                roomid = a.Roomid,
-                a.UserId,
-                a.Name,
-                a.Message1,
-                a.Createdat,
-                room = a.Room.Name,
-                User = a.User.Name
-            }).ToListAsync();
-        return Ok(messages);
+       var result =await _messageService.GetAllMessagesAsync();
+       return Ok(result);
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetMessageById(long id) // MessageId is 'long'
+    public async Task<IActionResult> GetMessageById(long id) 
     {
-        var message = await _context.Messages
-            .Where(a => a.MessageId == id)
-             .Select(a => new
-             {
-                 a.MessageId,
-                 roomid = a.Roomid,
-                 a.UserId,
-                 a.Name,
-                 a.Message1,
-                 a.Createdat,
-                 room = a.Room.Name,
-                 User = a.User.Name
-             }).ToListAsync();
-
-        if (message == null) return NotFound(new { message = "Message not found." });
-
-        return Ok(message);
+        var result = await _messageService.GetMessageByIdAsync(id);
+        if (result == null) { return NotFound(new { message = "Message not found." });}
+        return Ok(result);
     }
 
     [HttpPost]
     public async Task<IActionResult> CreateMessage([FromBody] MessageCreateDto dto)
     {
-        if (dto == null) return BadRequest(new { message = "Invalid data." });
+        if (dto == null)
+            return BadRequest(new { message = "Message data is required." });
+        var newId = await _messageService.CreateMessageAsync(dto);
 
-        var message = new Message
-        {
-            Roomid = dto.RoomId,
-            UserId = dto.UserId,
-            Name = dto.Name,
-            Message1 = dto.Message,
-            Createdat = DateTime.UtcNow
-        };
-
-        _context.Messages.Add(message);
-        var room = await _context.Chatrooms.FindAsync(dto.RoomId);
-        if (room != null)
-        {
-            room.MessageSenderName = dto.Name;
-            room.MessageContent = dto.Message;
-            // You might also want to update the MessageId in the room table
-        }
-        await _context.SaveChangesAsync();
-
-        return CreatedAtAction(nameof(GetMessageById), new { id = message.MessageId }, message);
+        return CreatedAtAction(nameof(GetMessageById), new { id = newId }, new { id = newId });
     }
-
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteMessage(long id)
     {
-        var message = await _context.Messages.FindAsync(id);
-        if (message == null) return NotFound(new { message = "Message not found." });
-
-        _context.Messages.Remove(message);
-        await _context.SaveChangesAsync();
-
+        var success = await _messageService.DeleteMessageAsync(id);
         return Ok(new { message = "Message deleted successfully." });
     }
 }

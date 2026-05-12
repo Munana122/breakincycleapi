@@ -21,7 +21,13 @@ namespace breakincycleapi.Services
                     c.Roomid,
                     name = c.Name,
                     c.Description,
-                    messages = c.Messages.Count // Example: just return count for list view
+                    messages = c.Messages.Select(m => new
+                    {
+                        m.MessageId,
+                        senderName = m.User.Name,
+                        MessageContent = m.Message1,
+                        sentAt = m.Createdat
+                    }).ToList()
                 }).ToListAsync();
         }
 

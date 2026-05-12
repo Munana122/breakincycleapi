@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using breakincycleapi.Database;
 using breakincycleapi.Database.Models;
 using breakincycleapi.DTO_s;
+using breakincycleapi.Services;
 
 namespace breakincycleapi.Controllers;
 
@@ -10,24 +11,24 @@ namespace breakincycleapi.Controllers;
 [Route("api/[controller]")]
 public class TeachersController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly ITeacherService _teacherService;
 
-    public TeachersController(AppDbContext context)
+    public TeachersController(ITeacherService teacherService)
     {
-        _context = context;
+        _teacherService = teacherService;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAllTeachers()
     {
-        var teachers = await _context.Teachers.ToListAsync();
+        var teachers = await _teacherService.GetAllTeachersAsync();
         return Ok(teachers);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetTeacherById(Guid id)
     {
-        var teacher = await _context.Teachers.FindAsync(id);
+        var teacher = await _teacherService.GetTeacherByIdAsync(id);
         if (teacher == null) return NotFound(new { message = "Teacher not found." });
 
         return Ok(teacher);
@@ -36,54 +37,26 @@ public class TeachersController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateTeacher([FromBody] TeacherCreateDto dto)
     {
-        if (dto == null) return BadRequest(new { message = "Invalid teacher data." });
-
-        var teacher = new Teacher
-        {
-            TeacherId = Guid.NewGuid(),
-            Name = dto.Name,
-            Email = dto.Email,
-            Coursename = dto.Coursename,
-            Phonenumber = dto.PhoneNumber,
-            Location = dto.Location,
-            Createdat = DateTime.UtcNow,
-            Lastactive = DateTime.UtcNow
-        };
-
-        _context.Teachers.Add(teacher);
-        await _context.SaveChangesAsync();
-
-        return CreatedAtAction(nameof(GetTeacherById), new { id = teacher.TeacherId }, teacher);
+        var newId = await _teacherService.CreateTeacherAsync(dto);
+        return CreatedAtAction(nameof(GetTeacherById), new { id = newId }, null);
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateTeacher(Guid id, [FromBody] TeacherUpdateDTO dto)
+    public async Task<IActionResult> UpdateTeacherAsync(Guid id, TeacherUpdateDTO dto)
     {
-
-        var existingTeacher = await _context.Teachers.FindAsync(id);
-        if (existingTeacher == null) return NotFound(new { message = "Teacher not found." });
-
-        existingTeacher.Name = dto.Name;
-        existingTeacher.Email = dto.Email;
-        existingTeacher.Phonenumber = dto.Phonenumber; // Fixed typo "Phonenumbar" from previous models based on new class properties
-        existingTeacher.Coursename = dto.Coursename;
-        existingTeacher.Lastactive = DateTime.UtcNow;
-
-        _context.Teachers.Update(existingTeacher);
-        await _context.SaveChangesAsync();
-
-        return Ok(existingTeacher);
+        var success = await _teacherService.UpdateTeacherAsync(id, dto);
+        if (!success)
+        {
+            return NotFound(new { message = "Teacher not found." });
+        }
+        return Ok(success);
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteTeacher(Guid id)
     {
-        var teacher = await _context.Teachers.FindAsync(id);
+        var teacher = await _teacherService.DeleteTeacherAsync(id);
         if (teacher == null) return NotFound(new { message = "Teacher not found." });
-
-        _context.Teachers.Remove(teacher);
-        await _context.SaveChangesAsync();
-
         return Ok(new { message = "Teacher deleted successfully." });
     }
 }
